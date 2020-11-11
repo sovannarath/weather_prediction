@@ -137,49 +137,61 @@ class NeuronLayer:
 class ArtificialNeuralNetwork:
     LEARNING_RATE = 0.5
 
-    def __init__(self, num_inputs, num_hidden, num_outputs, hidden_layer_weights = None, hidden_layer_bias = None, output_layer_weights = None, output_layer_bias = None, num_layers = 1):
+    def __init__(self, num_inputs, num_hidden, num_outputs, num_layers = 1, hidden_layer_weights = None, hidden_layer_bias = None, output_layer_weights = None, output_layer_bias = None):
         self.num_inputs = num_inputs
+        self.num_layers = num_layers
+        
+        self.hidden_layer = [0] * num_layers
+        for l in range(num_layers):
+            self.hidden_layer[l] = NeuronLayer(num_hidden, hidden_layer_bias)
+            self.init_weights_from_inputs_to_hidden_layer_neurons(hidden_layer_weights)
 
-        self.hidden_layer = NeuronLayer(num_hidden, hidden_layer_bias)
         self.output_layer = NeuronLayer(num_outputs, output_layer_bias)
-
-        self.init_weights_from_inputs_to_hidden_layer_neurons(hidden_layer_weights)
         self.init_weights_from_hidden_layer_neurons_to_output_layer_neurons(output_layer_weights)
 
+    # Method used to initialize weights for neuron of each network layer 
     def init_weights_from_inputs_to_hidden_layer_neurons(self, hidden_layer_weights):
-        weight_num = 0
-        for h in range(len(self.hidden_layer.neurons)):
-            for i in range(self.num_inputs):
-                if not hidden_layer_weights:
-                    self.hidden_layer.neurons[h].weights.append(random.random())
-                else:
-                    self.hidden_layer.neurons[h].weights.append(hidden_layer_weights[weight_num])
-                weight_num += 1
+        for l in range(self.num_layers):
+            weight_num = 0
+            for h in range(len(self.hidden_layer[l].neurons)):
+                for i in range(self.num_inputs):
+                    if not hidden_layer_weights:
+                        self.hidden_layer[l].neurons[h].weights.append(random.random())
+                    else:
+                        self.hidden_layer[l].neurons[h].weights.append(hidden_layer_weights[weight_num])
+                    weight_num += 1
 
+    # Method used to initialize weight for each neuron of output layer
     def init_weights_from_hidden_layer_neurons_to_output_layer_neurons(self, output_layer_weights):
-        weight_num = 0
-        for o in range(len(self.output_layer.neurons)):
-            for h in range(len(self.hidden_layer.neurons)):
-                if not output_layer_weights:
-                    self.output_layer.neurons[o].weights.append(random.random())
-                else:
-                    self.output_layer.neurons[o].weights.append(output_layer_weights[weight_num])
-                weight_num += 1
+            weight_num = 0
+            for o in range(len(self.output_layer.neurons)):
+                for h in range(len(self.hidden_layer[len(self.hidden_layer)-1].neurons)):
+                    if not output_layer_weights:
+                        self.output_layer.neurons[o].weights.append(random.random())
+                    else:
+                        self.output_layer.neurons[o].weights.append(output_layer_weights[weight_num])
+                    weight_num += 1
 
     def inspect(self):
         print('------')
         print('* Inputs: {}'.format(self.num_inputs))
         print('------')
-        print('Hidden Layer')
-        self.hidden_layer.inspect()
+        for l in range(self.num_layers):
+            print('Hidden Layer: {}'.format(l))
+            self.hidden_layer[l].inspect()
         print('------')
         print('* Output Layer')
         self.output_layer.inspect()
         print('------')
 
     def feed_forward(self, inputs):
-        hidden_layer_outputs = self.hidden_layer.feed_forward(inputs)
-        return self.output_layer.feed_forward(hidden_layer_outputs)
+        layer_feed_forward_results = [0] * self.num_layers
+        for l in range(self.num_layers):
+            if (l == 0) :
+                layer_feed_forward_results[l] = self.hidden_layer[l].feed_forward(inputs)
+            else:
+                layer_feed_forward_results[l] = self.hidden_layer[l].feed_forward(layer_feed_forward_results[l-1])
+        return self.output_layer.feed_forward(layer_feed_forward_results[len(self.hidden_layer)-1])
 
     # Uses online learning, ie updating the weights after each training case
     def train(self, training_inputs, training_outputs):
@@ -199,7 +211,6 @@ class ArtificialNeuralNetwork:
             derivative_error_with_respect_to_hidden_neuron_output = 0
             for o in range(len(self.output_layer.neurons)):
                 derivative_error_with_respect_to_hidden_neuron_output += partial_derivative_errors_with_respect_to_output_neuron_total_net_input[o] * self.output_layer.neurons[o].weights[h]
-
             # ∂E/∂Netⱼ = dE/dyⱼ * ∂Netⱼ/∂
             partial_derivative_errors_with_respect_to_hidden_neuron_total_net_input[h] = derivative_error_with_respect_to_hidden_neuron_output * self.hidden_layer.neurons[h].calculate_partial_derivative_total_net_input_with_respect_to_input()
 
@@ -233,7 +244,6 @@ class ArtificialNeuralNetwork:
 
 
 # Blog post example:
-
 ann = ArtificialNeuralNetwork(2, 2, 2, hidden_layer_weights=[0.15, 0.2, 0.25, 0.3], hidden_layer_bias=0.35, output_layer_weights=[0.4, 0.45, 0.5, 0.55], output_layer_bias=0.6)
 for i in range(10000):
     ann.train([0.05, 0.1], [0.01, 0.99])
