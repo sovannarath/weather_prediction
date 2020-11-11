@@ -215,7 +215,7 @@ class ArtificialNeuralNetwork:
         for h in range(len(self.hidden_layer.neurons)):
             for w_ih in range(len(self.hidden_layer.neurons[h].weights)):
                 # ∂Eⱼ/∂wᵢ = ∂E/∂Netⱼ * ∂zⱼ/∂wᵢ
-                partial_derivative_error_with_respect_to_weight = partial_derivative_errors_with_respect_to_hidden_neuron_total_net_input[h] * self.hidden_layer.neurons[h].calculate_partial_derivative_total_net_input_wrt_weight(w_ih)
+                partial_derivative_error_with_respect_to_weight = partial_derivative_errors_with_respect_to_hidden_neuron_total_net_input[h] * self.hidden_layer.neurons[h].calculate_partial_derivative_total_net_input_with_respect_to_weight(w_ih)
                 # Δw = α * ∂Eⱼ/∂wᵢ
                 self.hidden_layer.neurons[h].weights[w_ih] -= self.LEARNING_RATE * partial_derivative_error_with_respect_to_weight
 
@@ -234,10 +234,10 @@ class ArtificialNeuralNetwork:
 
 # Blog post example:
 
-#ann = ArtificialNeuralNetwork(2, 2, 2, hidden_layer_weights=[0.15, 0.2, 0.25, 0.3], hidden_layer_bias=0.35, output_layer_weights=[0.4, 0.45, 0.5, 0.55], output_layer_bias=0.6)
-#for i in range(10000):
-#    nn.train([0.05, 0.1], [0.01, 0.99])
-#    print(i, round(nn.calculate_total_error([[[0.05, 0.1], [0.01, 0.99]]]), 9))
+ann = ArtificialNeuralNetwork(2, 2, 2, hidden_layer_weights=[0.15, 0.2, 0.25, 0.3], hidden_layer_bias=0.35, output_layer_weights=[0.4, 0.45, 0.5, 0.55], output_layer_bias=0.6)
+for i in range(10000):
+    ann.train([0.05, 0.1], [0.01, 0.99])
+    print(i, round(ann.calculate_total_error([[[0.05, 0.1], [0.01, 0.99]]]), 9))
 
 # XOR example:
 
