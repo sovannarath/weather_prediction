@@ -9,6 +9,7 @@
 # Date of complettion: 31 December 2020                             #
 # ***************************************************************** #
 
+
 # *****************************************************************
 # Import Library
 #
@@ -16,6 +17,7 @@
 # *****************************************************************
 import random
 import math
+
 
 # *****************************************************************
 # Start of Neuron Class
@@ -48,51 +50,39 @@ class Neuron:
         return 1 / (1 + math.exp(-total_net_input))
 
     # The error for each neuron is calculated by the Mean Square Error method:
-    # Sum of Square Error
     def calculate_error(self, target_output):
         return 0.5 * (target_output - self.output) ** 2
 
+    # Method calculate partial derivative of total error with respect to actual output (∂E/∂yⱼ)
     # The partial derivate of the error with respect to actual output then is calculated by:
     # = 2 * 0.5 * (target output - actual output) ^ (2 - 1) * -1
-    # = -(target output - actual output)
-    #
-    # The Wikipedia article on backpropagation [1] simplifies to the following, but most other learning material does not [2]
-    # = actual output - target output
-    #
-    # Alternative, you can use (target - output), but then need to add it during backpropagation [3]
-    #
-    # Note that the actual output of the output neuron is often written as yⱼ and target output as tⱼ so:
-    # = ∂E/∂yⱼ = -(tⱼ - yⱼ)
+    # ∂E/∂yⱼ = -(target output - actual output)
+    # Note that the actual output of the output neuron is often written as yⱼ and target output as tⱼ
+    # => ∂E/∂yⱼ = -(tⱼ - yⱼ)
     def calculate_partial_derivative_error_with_respect_to_output(self, target_output):
         return -(target_output - self.output)
 
-    # The total net input into the neuron is squashed using logistic function to calculate the neuron's output:
-    # yⱼ = φ = 1 / (1 + e^(-zⱼ))
-    # Note that where ⱼ represents the output of the neurons in whatever layer we're looking at and ᵢ represents the layer below it
-    #
+    # Method calculate partial derivative of actual output with respect to total weighted sum (dyⱼ/dNetⱼ)
+    # The actual output of the neuron is calculate using sigmoid logistic function:
+    # yⱼ = 1 / (1 + e^(-Netⱼ))
     # The derivative (not partial derivative since there is only one variable) of the output then is:
-    # dyⱼ/dzⱼ = yⱼ * (1 - yⱼ)
+    # dyⱼ/dNetⱼ = yⱼ * (1 - yⱼ)
     def calculate_partial_derivative_total_net_input_with_respect_to_input(self):
         return self.output * (1 - self.output)
 
-    # Determine how much the neuron's total input has to change to move closer to the expected output
-    #
-    # Now that we have the partial derivative of the error with respect to the output (∂E/∂yⱼ) and
-    # the derivative of the output with respect to the total net input (dyⱼ/dzⱼ) we can calculate
-    # the partial derivative of the error with respect to the total net input.
-    # This value is also known as the delta (δ) [1]
-    # δ = ∂E/∂zⱼ = ∂E/∂yⱼ * dyⱼ/dzⱼ
-    #
-    def calculate_partial_derivative_error_with_respect_to_total_net_input(self, target_output):
-        return self.calculate_partial_derivative_error_with_respect_to_output(target_output) * self.calculate_partial_derivative_total_net_input_with_respect_to_input();
-
+    # Partial derivative of weighted sum (net) with respect to wieght (∂Netⱼ/∂wᵢ)
     # The total net input is the weighted sum of all the inputs to the neuron and their respective weights:
-    # = zⱼ = netⱼ = x₁w₁ + x₂w₂ ...
-    #
+    # = Netⱼ = x₁w₁ + x₂w₂ ...
     # The partial derivative of the total net input with respective to a given weight (with everything else held constant) then is:
-    # = ∂zⱼ/∂wᵢ = some constant + 1 * xᵢw₁^(1-0) + some constant ... = xᵢ
+    # = ∂Netⱼ/∂wᵢ = some constant + 1 * xᵢw₁^(1-0) + some constant ... = xᵢ
     def calculate_partial_derivative_total_net_input_with_respect_to_weight(self, index):
         return self.inputs[index]
+
+    # Method calculate partial derivative of total errors with respect to weight of i (∂E/∂zⱼ) 
+    # This value is also known as the delta (δ)
+    # δ = ∂E/∂zⱼ = ∂E/∂yⱼ * dyⱼ/dzⱼ
+    def calculate_partial_derivative_error_with_respect_to_total_net_input(self, target_output):
+        return self.calculate_partial_derivative_error_with_respect_to_output(target_output) * self.calculate_partial_derivative_total_net_input_with_respect_to_input();
 
 # ******* End of Neuron Class ******* #
 # *********************************** #
@@ -107,7 +97,7 @@ class Neuron:
 class NeuronLayer:
     def __init__(self, num_neurons, bias):
 
-        # Every neuron in a layer shares the same bias
+        # Each neuron in a layer shares the same bias
         self.bias = bias if bias else random.random()
 
         self.neurons = []
