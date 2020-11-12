@@ -1,22 +1,27 @@
 # ***************************************************************** #
 # Royal University of Phnom Penh                                    #
-# Master of Information Technology and Engineering                  #
+# Master of Information Technology and Engineering (MITE)           #
 # Cohort 13 (November 2018 - 2020)                                  #
+# Supervisor Name: Dr. Srun Sovila                                  #
+# Field of Research: Data Science                                   #
 #                                                                   #
 # Thesis title: Weather Prediction Using Artificial Neural Network  #
 # Author Name: Thorn Sovannarath                                    #
 # Start Date: 11 November 2020                                      #
-# Date of complettion: 31 December 2020                             #
+# Date of Complettion: Not yet difined                              #
 # ***************************************************************** #
 
 
 # *****************************************************************
-# Import Library
+# Import Libraries
 #
 # Import necessary required libraries to work with ANN
 # *****************************************************************
 import random
 import math
+
+# ******* End of Importing Libraries ******* #
+# ****************************************** #
 
 
 # *****************************************************************
