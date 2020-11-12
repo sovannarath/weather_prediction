@@ -8,7 +8,7 @@
 # Thesis title: Weather Prediction Using Artificial Neural Network  #
 # Author Name: Thorn Sovannarath                                    #
 # Start Date: 11 November 2020                                      #
-# Date of Complettion: Not yet difined                              #
+# Date of Completion: Not yet defined                               #
 # ***************************************************************** #
 
 
