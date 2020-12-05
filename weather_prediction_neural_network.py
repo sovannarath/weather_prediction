@@ -277,18 +277,36 @@ class ArtificialNeuralNetwork:
 #     nn.train(training_inputs, training_outputs)
 #     print(i, nn.calculate_total_error(training_sets))
 
+# Define weather conditions
+weather_conditions = ['sunny', 'cloudy', 'partly cloudy', 'light rain', 'patchy rain possible', 
+                      'heavy rain', 'mist', 'fog', 'heavey rain with thunder', 'thunder outbreak possible']
+
 # Reading data into array
 with open('TestCSVReading.csv', mode='r') as csv_file:
-    #csv_reader = csv.reader(csv_file, delimiter=',') #this read as list
-    csv_reader = csv.DictReader(csv_file)
-    #line_count = 0
+    csv_reader = csv.reader(csv_file, delimiter=',') #this read as list
+    #csv_reader = csv.DictReader(csv_file)
+    original_weather_data = []
+    tmp_ori_index = 0
+    training_data = []
     for row in csv_reader:
-        print(row['date_time'])
-    #    if line_count == 0 :
-    #        print(f'Column name are {", ".join(row)}')
-    #        line_count += 1
-    #    else:
-    #        print(f'\t{row[0]}\t{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[6]}\t{row[7]}')
-    #        line_count += 1
-    #print(f'Processed {line_count} lines.')
-     
+        if tmp_ori_index != 0 :
+            original_weather_data.append(row)
+            tmp_train = row.copy()
+            del tmp_train[0]
+            del tmp_train[len(tmp_train) - 1]
+            training_data.append(tmp_train)
+            t_p_w_conditions = [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01]
+            t_p_w_con_index = 0
+            for con in weather_conditions:
+                if(row[len(row) - 1].lower() == con.lower()) :
+                    t_p_w_conditions[t_p_w_con_index] = 0.99
+                    break
+                t_p_w_con_index += 1
+            print(t_p_w_conditions)
+        tmp_ori_index += 1
+    print("\n")
+    for t in training_data:
+        print(t)
+    print("\n")
+    for ow in original_weather_data:
+        print(ow)
