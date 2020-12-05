@@ -288,6 +288,7 @@ with open('TestCSVReading.csv', mode='r') as csv_file:
     original_weather_data = []
     tmp_ori_index = 0
     training_data = []
+    result_weather_data = []
     for row in csv_reader:
         if tmp_ori_index != 0 :
             original_weather_data.append(row)
