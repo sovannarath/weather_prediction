@@ -24,6 +24,16 @@ import csv
 # ******* End of Importing Libraries ******* #
 # ****************************************** #
 
+# ******************************************************************
+# Define some importants varaible 
+# ******************************************************************
+# Define weather conditions
+weather_conditions = ['sunny', 'cloudy', 'partly cloudy', 'light rain', 'patchy rain possible', 
+                      'heavy rain', 'mist', 'fog', 'heavey rain with thunder', 'thunder outbreak possible']
+data_column_header = []
+# ******* End of Define Variables ******* #
+# *************************************** #
+
 
 # *****************************************************************
 # Start of Neuron Class
@@ -254,7 +264,49 @@ class ArtificialNeuralNetwork:
 # ******* End of Artificial Neural Network Class ******* #
 # ****************************************************** #
 
+# Reading data into array
+# 'TestCSVReading.csv'
+def readCSV(fileName) :
+    original_weather_data = []
+    with open(fileName, mode='r') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        tmp_ori_index = 0
+        for row in csv_reader:
+            if tmp_ori_index == 0 :
+                data_column_header.append(row)
+            else:
+                original_weather_data.append(row)
+            tmp_ori_index += 1
+    return original_weather_data
 
+def prepareTrainingData(original_weather_data) :
+    tmp_origin_data = original_weather_data.copy()
+    training_data = []
+    for data in tmp_origin_data :
+        del data[0]
+        del data[len(data)-1]
+        training_data.append(data)
+    return training_data
+
+def prepareTrainingOutput(original_weather_data) :
+    tmp_origin_data = original_weather_data.copy()
+    del tmp_origin_data[0]
+    training_output = []
+    for row in tmp_origin_data :
+        tmp_w_conditions = [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01]
+        tmp_w_con_index = 0
+        for con in weather_conditions:
+            if(row[len(row) - 1].lower() == con.lower()) :
+                tmp_w_conditions[tmp_w_con_index] = 0.99
+                training_output.append(tmp_w_conditions)
+                break
+            tmp_w_con_index += 1
+    return training_output
+
+
+weather_d = prepareTrainingOutput(readCSV('TestCSVReading.csv'))
+for r in weather_d :
+    print(r)
 
 # Blog post example:
 #ann = ArtificialNeuralNetwork(2, 2, 2, hidden_layer_weights=[0.15, 0.2, 0.25, 0.3], hidden_layer_bias=0.35, output_layer_weights=[0.4, 0.45, 0.5, 0.55], output_layer_bias=0.6)
@@ -277,37 +329,31 @@ class ArtificialNeuralNetwork:
 #     nn.train(training_inputs, training_outputs)
 #     print(i, nn.calculate_total_error(training_sets))
 
-# Define weather conditions
-weather_conditions = ['sunny', 'cloudy', 'partly cloudy', 'light rain', 'patchy rain possible', 
-                      'heavy rain', 'mist', 'fog', 'heavey rain with thunder', 'thunder outbreak possible']
-
-# Reading data into array
-with open('TestCSVReading.csv', mode='r') as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=',') #this read as list
-    #csv_reader = csv.DictReader(csv_file)
-    original_weather_data = []
-    tmp_ori_index = 0
-    training_data = []
-    result_weather_data = []
-    for row in csv_reader:
-        if tmp_ori_index != 0 :
-            original_weather_data.append(row)
-            tmp_train = row.copy()
-            del tmp_train[0]
-            del tmp_train[len(tmp_train) - 1]
-            training_data.append(tmp_train)
-            t_p_w_conditions = [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01]
-            t_p_w_con_index = 0
-            for con in weather_conditions:
-                if(row[len(row) - 1].lower() == con.lower()) :
-                    t_p_w_conditions[t_p_w_con_index] = 0.99
-                    break
-                t_p_w_con_index += 1
-            print(t_p_w_conditions)
-        tmp_ori_index += 1
-    print("\n")
-    for t in training_data:
-        print(t)
-    print("\n")
-    for ow in original_weather_data:
-        print(ow)
+#with open(fileName, mode='r') as csv_file:
+#        csv_reader = csv.reader(csv_file, delimiter=',')
+#        original_weather_data = []
+#        tmp_ori_index = 0
+#        
+#        result_weather_data = []
+#        for row in csv_reader:
+#           if tmp_ori_index != 0 :
+#               original_weather_data.append(row)
+#                tmp_train = row.copy()
+#                del tmp_train[0]
+#                del tmp_train[len(tmp_train) - 1]
+#                training_data.append(tmp_train)
+#                t_p_w_conditions = [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01]
+#                t_p_w_con_index = 0
+#                for con in weather_conditions:
+#                    if(row[len(row) - 1].lower() == con.lower()) :
+#                        t_p_w_conditions[t_p_w_con_index] = 0.99
+#                        break
+#                    t_p_w_con_index += 1
+#                print(t_p_w_conditions)
+#            tmp_ori_index += 1
+#        print("\n")
+#        for t in training_data:
+#            print(t)
+#        print("\n")
+#        for ow in original_weather_data:
+#            print(ow)
