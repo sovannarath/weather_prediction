@@ -20,6 +20,7 @@
 import random
 import math
 import csv
+import copy
 
 # ******* End of Importing Libraries ******* #
 # ****************************************** #
@@ -58,7 +59,7 @@ class Neuron:
     def calculate_total_net_input(self):
         total = 0
         for i in range(len(self.inputs)):
-            total += self.inputs[i] * self.weights[i]
+            total += float(self.inputs[i]) * self.weights[i]
         return total + self.bias
 
     # This is activation applied the logistic function to the output of the neuron
@@ -70,8 +71,6 @@ class Neuron:
         return 0.5 * (target_output - self.output) ** 2
 
     # Method calculate partial derivative of total error with respect to actual output (∂E/∂yⱼ)
-    # The partial derivate of the error with respect to actual output then is calculated by:
-    # = 2 * 0.5 * (target output - actual output) ^ (2 - 1) * -1
     # ∂E/∂yⱼ = -(target output - actual output)
     # Note that the actual output of the output neuron is often written as yⱼ and target output as tⱼ
     # => ∂E/∂yⱼ = -(tⱼ - yⱼ)
@@ -248,7 +247,7 @@ class ArtificialNeuralNetwork:
             for h in range(len(self.hidden_layer[l].neurons)):
                 for w_ih in range(len(self.hidden_layer[l].neurons[h].weights)):
                     # ∂Eⱼ/∂wᵢ = ∂E/∂Netⱼ * ∂zⱼ/∂wᵢ
-                    partial_derivative_error_with_respect_to_weight = partial_derivative_errors_with_respect_to_hidden_neuron_total_net_input[l][h] * self.hidden_layer[l].neurons[h].calculate_partial_derivative_total_net_input_with_respect_to_weight(w_ih)
+                    partial_derivative_error_with_respect_to_weight = partial_derivative_errors_with_respect_to_hidden_neuron_total_net_input[l][h] * float(self.hidden_layer[l].neurons[h].calculate_partial_derivative_total_net_input_with_respect_to_weight(w_ih))
                     # Δw = α * ∂Eⱼ/∂wᵢ
                     self.hidden_layer[l].neurons[h].weights[w_ih] -= self.LEARNING_RATE * partial_derivative_error_with_respect_to_weight
 
@@ -280,7 +279,7 @@ def readCSV(fileName) :
     return original_weather_data
 
 def prepareTrainingData(original_weather_data) :
-    tmp_origin_data = original_weather_data.copy()
+    tmp_origin_data = original_weather_data
     training_data = []
     for data in tmp_origin_data :
         del data[0]
@@ -289,8 +288,7 @@ def prepareTrainingData(original_weather_data) :
     return training_data
 
 def prepareTrainingOutput(original_weather_data) :
-    tmp_origin_data = original_weather_data.copy()
-    del tmp_origin_data[0]
+    tmp_origin_data = original_weather_data
     training_output = []
     for row in tmp_origin_data :
         tmp_w_conditions = [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01]
@@ -298,62 +296,33 @@ def prepareTrainingOutput(original_weather_data) :
         for con in weather_conditions:
             if(row[len(row) - 1].lower() == con.lower()) :
                 tmp_w_conditions[tmp_w_con_index] = 0.99
-                training_output.append(tmp_w_conditions)
-                break
             tmp_w_con_index += 1
+        training_output.append(tmp_w_conditions)
     return training_output
 
-
-weather_d = prepareTrainingOutput(readCSV('TestCSVReading.csv'))
-for r in weather_d :
-    print(r)
+# Training process
+weather_data = readCSV('TestCSVReading.csv')
+training_data = [0] * len(weather_data)
+training_data = prepareTrainingData(copy.deepcopy(weather_data))
+training_output = [0] * len(weather_data)
+training_output = prepareTrainingOutput(copy.deepcopy(weather_data))
+input_ele_numbers = len(training_data[0])
+output_ele_numbers = len(training_output[0])
+#print(len(training_data))
+#print(len(training_output))
+ann = ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers, output_ele_numbers, hidden_layer_bias=0.35, output_layer_bias=0.6)
+record_count = 0
+for t_d in training_data :
+    print(record_count+1)
+    for i in range(30):
+        ann.train(t_d, training_output[record_count])
+        print(i, round(ann.calculate_total_error([[t_d, training_output[record_count]]]), 9))
+    record_count += 1
+    #break
+    
 
 # Blog post example:
 #ann = ArtificialNeuralNetwork(2, 2, 2, hidden_layer_weights=[0.15, 0.2, 0.25, 0.3], hidden_layer_bias=0.35, output_layer_weights=[0.4, 0.45, 0.5, 0.55], output_layer_bias=0.6)
 #for i in range(10000):
 #    ann.train([0.05, 0.1], [0.01, 0.99])
 #    print(i, round(ann.calculate_total_error([[[0.05, 0.1], [0.01, 0.99]]]), 9))
-
-# XOR example:
-
-# training_sets = [
-#     [[0, 0], [0]],
-#     [[0, 1], [1]],
-#     [[1, 0], [1]],
-#     [[1, 1], [0]]
-# ]
-
-# nn = NeuralNetwork(len(training_sets[0][0]), 5, len(training_sets[0][1]))
-# for i in range(10000):
-#     training_inputs, training_outputs = random.choice(training_sets)
-#     nn.train(training_inputs, training_outputs)
-#     print(i, nn.calculate_total_error(training_sets))
-
-#with open(fileName, mode='r') as csv_file:
-#        csv_reader = csv.reader(csv_file, delimiter=',')
-#        original_weather_data = []
-#        tmp_ori_index = 0
-#        
-#        result_weather_data = []
-#        for row in csv_reader:
-#           if tmp_ori_index != 0 :
-#               original_weather_data.append(row)
-#                tmp_train = row.copy()
-#                del tmp_train[0]
-#                del tmp_train[len(tmp_train) - 1]
-#                training_data.append(tmp_train)
-#                t_p_w_conditions = [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01]
-#                t_p_w_con_index = 0
-#                for con in weather_conditions:
-#                    if(row[len(row) - 1].lower() == con.lower()) :
-#                        t_p_w_conditions[t_p_w_con_index] = 0.99
-#                        break
-#                    t_p_w_con_index += 1
-#                print(t_p_w_conditions)
-#            tmp_ori_index += 1
-#        print("\n")
-#        for t in training_data:
-#            print(t)
-#        print("\n")
-#        for ow in original_weather_data:
-#            print(ow)
