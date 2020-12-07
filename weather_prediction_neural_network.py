@@ -264,7 +264,6 @@ class ArtificialNeuralNetwork:
 # ****************************************************** #
 
 # Reading data into array
-# 'TestCSVReading.csv'
 def readCSV(fileName) :
     original_weather_data = []
     with open(fileName, mode='r') as csv_file:
@@ -308,15 +307,13 @@ training_output = [0] * len(weather_data)
 training_output = prepareTrainingOutput(copy.deepcopy(weather_data))
 input_ele_numbers = len(training_data[0])
 output_ele_numbers = len(training_output[0])
-#print(len(training_data))
-#print(len(training_output))
 ann = ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers, output_ele_numbers, hidden_layer_bias=0.35, output_layer_bias=0.6)
 record_count = 0
 for t_d in training_data :
     print(record_count+1)
-    for i in range(30):
+    for i in range(40):
         ann.train(t_d, training_output[record_count])
-        print(i, round(ann.calculate_total_error([[t_d, training_output[record_count]]]), 9))
+        print(i, ann.calculate_total_error([[t_d, training_output[record_count]]]))
     record_count += 1
     #break
     
