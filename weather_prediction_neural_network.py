@@ -21,6 +21,8 @@ import random
 import math
 import csv
 import copy
+import matplotlib.pyplot as plt
+import numpy as np
 
 # ******* End of Importing Libraries ******* #
 # ****************************************** #
@@ -317,6 +319,12 @@ for t_d in training_data :
     record_count += 1
     #break
     
+x = np.linspace(-10, 10, 100)
+z = 1/(1 + np.exp(-x))
+plt.plot(x,z)
+plt.xlabel("X")
+plt.ylabel("Sigmoid(X)")
+plt.show()
 
 # Blog post example:
 #ann = ArtificialNeuralNetwork(2, 2, 2, hidden_layer_weights=[0.15, 0.2, 0.25, 0.3], hidden_layer_bias=0.35, output_layer_weights=[0.4, 0.45, 0.5, 0.55], output_layer_bias=0.6)
