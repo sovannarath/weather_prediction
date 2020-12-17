@@ -302,6 +302,7 @@ def prepareTrainingOutput(original_weather_data) :
     return training_output
 
 # Training process
+"""
 weather_data = readCSV('TestCSVReading.csv')
 training_data = [0] * len(weather_data)
 training_data = prepareTrainingData(copy.deepcopy(weather_data))
@@ -325,6 +326,11 @@ plt.plot(x,z)
 plt.xlabel("X")
 plt.ylabel("Sigmoid(X)")
 plt.show()
+"""
+
+weather_data_phnom_Penh = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
+for w in weather_data_phnom_Penh :
+    print(w)
 
 # Blog post example:
 #ann = ArtificialNeuralNetwork(2, 2, 2, hidden_layer_weights=[0.15, 0.2, 0.25, 0.3], hidden_layer_bias=0.35, output_layer_weights=[0.4, 0.45, 0.5, 0.55], output_layer_bias=0.6)
