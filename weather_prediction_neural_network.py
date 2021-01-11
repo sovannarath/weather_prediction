@@ -301,6 +301,63 @@ def prepareTrainingOutput(original_weather_data) :
         training_output.append(tmp_w_conditions)
     return training_output
 
+def barChart(weather_data) :
+    total_records = len(weather_data)
+    w_conditions = {}
+    for record in weather_data:
+        if (record[len(record)-1]) not in ["Fair / Windy", "T-Storm / Windy", "Thunder / Windy", "Partly Cloudy / Windy", "Light Rain Shower / Windy", "Light Rain / Windy", "Mostly Cloudy / Windy", "Heavy T-Storm / Windy"]:
+            if (record[len(record)-1]) not in w_conditions:
+                w_conditions[record[len(record)-1]] = 1
+            else:
+                w_conditions[record[len(record)-1]] = w_conditions[record[len(record)-1]] + 1
+
+    data = w_conditions.values()
+    conditions = w_conditions.keys()
+
+    data = w_conditions
+    names = list(data.keys())
+    values = list(data.values())
+    fig, axs = plt.subplots()
+    axs.bar(names, values)
+    fig.suptitle('Categorical Plotting')    
+    plt.show()
+
+def pieChart(weather_data):
+    fig, ax = plt.subplots(figsize=(6, 3), subplot_kw=dict(aspect="equal"))
+    
+    total_records = len(weather_data)
+    w_conditions = {}
+    for record in weather_data:
+        if (record[len(record)-1]) not in ["Fair / Windy", "T-Storm / Windy", "Thunder / Windy", "Partly Cloudy / Windy", "Light Rain Shower / Windy", "Light Rain / Windy", "Mostly Cloudy / Windy", "Heavy T-Storm / Windy"]:
+            if (record[len(record)-1]) not in w_conditions:
+                w_conditions[record[len(record)-1]] = 1
+            else:
+                w_conditions[record[len(record)-1]] = w_conditions[record[len(record)-1]] + 1
+
+    data = w_conditions.values()
+    conditions = w_conditions.keys()
+
+    def myfunc(pct):
+        return "{:.1f}%".format(pct)
+
+    wedges, texts, autotexts = ax.pie(data, labels=conditions, autopct=lambda pct: myfunc(pct), textprops=dict(color="w"))
+    ax.legend(wedges, conditions, title="Conditions", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
+    plt.setp(autotexts, size=8, weight="bold")
+    ax.set_title("Weather Phenomena IN A Year (%)")
+    plt.show()
+
+def scatterPlot(weather_data) :
+    fig, ax = plt.subplots()
+    for color in ['tab:blue', 'tab:orange', 'tab:green']:
+        n = 750
+        x, y = np.random.rand(2, n)
+        scale = 200.0 * np.random.rand(n)
+        ax.scatter(x, y, c=color, s=scale, label=color, alpha=0.9, edgecolors='none')
+
+    ax.legend()
+    #ax.grid(True)
+    plt.show()
+
 # Training process
 """
 weather_data = readCSV('TestCSVReading.csv')
@@ -319,21 +376,9 @@ for t_d in training_data :
         print(i, ann.calculate_total_error([[t_d, training_output[record_count]]]))
     record_count += 1
     #break
-    
-x = np.linspace(-10, 10, 100)
-z = 1/(1 + np.exp(-x))
-plt.plot(x,z)
-plt.xlabel("X")
-plt.ylabel("Sigmoid(X)")
-plt.show()
 """
 
-weather_data_phnom_Penh = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
-for w in weather_data_phnom_Penh :
-    print(w)
-
-# Blog post example:
-#ann = ArtificialNeuralNetwork(2, 2, 2, hidden_layer_weights=[0.15, 0.2, 0.25, 0.3], hidden_layer_bias=0.35, output_layer_weights=[0.4, 0.45, 0.5, 0.55], output_layer_bias=0.6)
-#for i in range(10000):
-#    ann.train([0.05, 0.1], [0.01, 0.99])
-#    print(i, round(ann.calculate_total_error([[[0.05, 0.1], [0.01, 0.99]]]), 9))
+weather_data_phnom_penh = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
+#barChart(copy.deepcopy(weather_data_phnom_penh))
+#pieChart(copy.deepcopy(weather_data_phnom_penh))
+scatterPlot(copy.deepcopy(weather_data_phnom_penh))
