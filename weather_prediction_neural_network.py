@@ -347,38 +347,73 @@ def pieChart(weather_data):
     plt.show()
 
 def scatterPlot(weather_data) :
+    w_records = {}
+    for record in weather_data:
+        if (record[len(record)-1]) not in ["Fair / Windy", "T-Storm / Windy", "Thunder / Windy", "Partly Cloudy / Windy", "Light Rain Shower / Windy", "Light Rain / Windy", "Mostly Cloudy / Windy", "Heavy T-Storm / Windy"]:
+            if (record[len(record)-1]) not in w_records:
+                w_records[record[len(record)-1]] = []
+                w_records[record[len(record)-1]].append(record)
+            else:
+                w_records[record[len(record)-1]].append(record)
+    
     fig, ax = plt.subplots()
-    for color in ['tab:blue', 'tab:orange', 'tab:green']:
-        n = 750
-        x, y = np.random.rand(2, n)
-        scale = 200.0 * np.random.rand(n)
-        ax.scatter(x, y, c=color, s=scale, label=color, alpha=0.9, edgecolors='none')
-
+    colors=['dodgerblue', 'orange', 'green', 'blue', 'teal', 'red', 'gold', 
+            'yellow', 'saddlebrown', 'crimson', 'grey', 'cyan', 'olivedrab', 'darkorange',
+            'lime', 'violet', 'purple', 'navy', 'olive', 'slategray', 'pink']
+    c_count = 0
+    for w_key in w_records:
+        x = [] 
+        y = []
+        scale = 25.0
+        for row in w_records[w_key]:
+            x.append(row[2])
+            y.append(row[3])
+        ax.scatter(x, y, c=colors[c_count], s=scale, label=w_key, alpha=0.8, edgecolors='none')
+        c_count = c_count + 1
     ax.legend()
     #ax.grid(True)
     plt.show()
 
-# Training process
-"""
-weather_data = readCSV('TestCSVReading.csv')
-training_data = [0] * len(weather_data)
-training_data = prepareTrainingData(copy.deepcopy(weather_data))
-training_output = [0] * len(weather_data)
-training_output = prepareTrainingOutput(copy.deepcopy(weather_data))
-input_ele_numbers = len(training_data[0])
-output_ele_numbers = len(training_output[0])
-ann = ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers, output_ele_numbers, hidden_layer_bias=0.35, output_layer_bias=0.6)
-record_count = 0
-for t_d in training_data :
-    print(record_count+1)
-    for i in range(40):
-        ann.train(t_d, training_output[record_count])
-        print(i, ann.calculate_total_error([[t_d, training_output[record_count]]]))
-    record_count += 1
-    #break
-"""
+def writeResultToCSV(pre_data):
+    # data to be written row-wise in csv fil 
+    data = [pre_data] 
+  
+    # opening the csv file in 'a+' mode 
+    file = open('results.csv', 'a+', newline ='') 
+  
+    # writing the data into the file 
+    with file:     
+        write = csv.writer(file) 
+        write.writerows(data) 
 
-weather_data_phnom_penh = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
+# Training process
+def trainingProcess():
+    weather_data = readCSV('TestCSVReading.csv')
+
+    training_data = [0] * len(weather_data)
+    training_data = prepareTrainingData(copy.deepcopy(weather_data))
+    
+    training_output = [0] * len(weather_data)
+    training_output = prepareTrainingOutput(copy.deepcopy(weather_data))
+    
+    input_ele_numbers = len(training_data[0])
+    output_ele_numbers = len(training_output[0])
+    ann = ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers, output_ele_numbers, hidden_layer_bias=0.35, output_layer_bias=0.6)
+    
+    record_count = 0
+    for t_d in training_data :
+        #for i in range(40):
+        ann.train(t_d, training_output[record_count])
+        total_error = ann.calculate_total_error([[t_d, training_output[record_count]]])
+        print(total_error)
+        t_d.append(total_error)
+        writeResultToCSV(copy.deepcopy(t_d))
+        record_count += 1
+        #break
+
+
+#weather_data_phnom_penh = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
 #barChart(copy.deepcopy(weather_data_phnom_penh))
 #pieChart(copy.deepcopy(weather_data_phnom_penh))
-scatterPlot(copy.deepcopy(weather_data_phnom_penh))
+#scatterPlot(copy.deepcopy(weather_data_phnom_penh))
+trainingProcess()
