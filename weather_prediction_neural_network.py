@@ -31,8 +31,7 @@ import numpy as np
 # Define some importants varaible 
 # ******************************************************************
 # Define weather conditions
-weather_conditions = ['sunny', 'cloudy', 'partly cloudy', 'light rain', 'patchy rain possible', 
-                      'heavy rain', 'mist', 'fog', 'heavey rain with thunder', 'thunder outbreak possible']
+weather_conditions = []
 data_column_header = []
 # ******* End of Define Variables ******* #
 # *************************************** #
@@ -283,16 +282,22 @@ def prepareTrainingData(original_weather_data) :
     tmp_origin_data = original_weather_data
     training_data = []
     for data in tmp_origin_data :
-        del data[0]
-        del data[len(data)-1]
-        training_data.append(data)
+        if(data[len(data)-1] != '') :
+            for i in [1,2,3] :
+                del data[0]
+            del data[3]
+            del data[4]
+            del data[len(data)-1]
+            training_data.append(data)
     return training_data
 
 def prepareTrainingOutput(original_weather_data) :
     tmp_origin_data = original_weather_data
     training_output = []
     for row in tmp_origin_data :
-        tmp_w_conditions = [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01]
+        tmp_w_conditions = []
+        for con_data in weather_conditions:
+            tmp_w_conditions.append(0.01)
         tmp_w_con_index = 0
         for con in weather_conditions:
             if(row[len(row) - 1].lower() == con.lower()) :
@@ -300,6 +305,15 @@ def prepareTrainingOutput(original_weather_data) :
             tmp_w_con_index += 1
         training_output.append(tmp_w_conditions)
     return training_output
+
+def initialWeatherConditions(weather_data):
+    tmp_weather_conditions = {}
+    for w in weather_data:
+        if(w[len(w)-1] != ''):
+            tmp_weather_conditions[w[len(w) - 1]] = 1
+    for key, value in tmp_weather_conditions.items() :
+        weather_conditions.append(key)
+    return weather_conditions
 
 def barChart(weather_data) :
     total_records = len(weather_data)
@@ -388,11 +402,10 @@ def writeResultToCSV(pre_data):
 
 # Training process
 def trainingProcess():
-    weather_data = readCSV('TestCSVReading.csv')
-
+    weather_data = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
+    c = initialWeatherConditions(copy.deepcopy(weather_data))
     training_data = [0] * len(weather_data)
     training_data = prepareTrainingData(copy.deepcopy(weather_data))
-    
     training_output = [0] * len(weather_data)
     training_output = prepareTrainingOutput(copy.deepcopy(weather_data))
     
