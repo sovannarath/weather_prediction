@@ -20,6 +20,7 @@
 import random
 import math
 import csv
+import os.path
 import copy
 import matplotlib.pyplot as plt
 import numpy as np
@@ -388,21 +389,36 @@ def scatterPlot(weather_data) :
     #ax.grid(True)
     plt.show()
 
-def writeResultToCSV(pre_data):
+def writeResultToCSV(pre_data, fileName = ''):
     # data to be written row-wise in csv fil 
     data = [pre_data] 
+    
+    if(fileName != ''):
+        print("Hello!")
+    else:
+        preFileName = 'results'
+        fileCount = 1;
+        f = ifFileExist(preFileName, fileCount)
+        print(f)
+        # opening the csv file in 'a+' mode 
+        #file = open('results.csv', 'a+', newline ='') 
   
-    # opening the csv file in 'a+' mode 
-    file = open('results.csv', 'a+', newline ='') 
-  
-    # writing the data into the file 
-    with file:     
-        write = csv.writer(file) 
-        write.writerows(data) 
+        # writing the data into the file 
+        #with file:     
+        #    write = csv.writer(file) 
+        #    write.writerows(data) 
+
+def ifFileExist(fileName, count):
+    tmp_file_name = fileName + str(count) + '.csv'
+    if os.path.isfile(tmp_file_name):
+        return tmp_file_name
+    else :   
+        ifFileExist(fileName, count + 1)
 
 # Training process
 def trainingProcess():
     weather_data = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
+    tmp_weather_data = copy.deepcopy(weather_data)
     c = initialWeatherConditions(copy.deepcopy(weather_data))
     training_data = [0] * len(weather_data)
     training_data = prepareTrainingData(copy.deepcopy(weather_data))
@@ -415,14 +431,17 @@ def trainingProcess():
     
     record_count = 0
     for t_d in training_data :
-        #for i in range(40):
-        ann.train(t_d, training_output[record_count])
-        total_error = ann.calculate_total_error([[t_d, training_output[record_count]]])
-        print(total_error)
-        t_d.append(total_error)
-        writeResultToCSV(copy.deepcopy(t_d))
+        for i in range(40):
+            ann.train(t_d, training_output[record_count])
+            total_error = ann.calculate_total_error([[t_d, training_output[record_count]]])
+            print(total_error)
+            if(total_error <= 0.01) :
+                break
+        #t_d.append(total_error)
+        tmp_weather_data[record_count].append(total_error)
+        #writeResultToCSV(copy.deepcopy(t_d))
+        writeResultToCSV(copy.deepcopy(tmp_weather_data[record_count]))
         record_count += 1
-        #break
 
 
 #weather_data_phnom_penh = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
