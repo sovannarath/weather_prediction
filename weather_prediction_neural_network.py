@@ -389,36 +389,49 @@ def scatterPlot(weather_data) :
     #ax.grid(True)
     plt.show()
 
-def writeResultToCSV(pre_data, fileName = ''):
-    # data to be written row-wise in csv fil 
+def writeResultToCSV(pre_data, fileName, is_new_round = True):
+    # data to be written row-wise in csv file
     data = [pre_data] 
-    
-    if(fileName != ''):
-        print("Hello!")
-    else:
-        preFileName = 'results'
-        fileCount = 1;
-        f = ifFileExist(preFileName, fileCount)
-        print(f)
-        # opening the csv file in 'a+' mode 
-        #file = open('results.csv', 'a+', newline ='') 
+    resultFileName = fileName
+    fileCount = 1
+    f = resultFileName + str(fileCount) + '.csv'
+    if(is_new_round == True):
+        tmp_file_name = fileName + str(fileCount) + '.csv'
+        while os.path.isfile(tmp_file_name) :
+            fileCount = fileCount + 1
+            tmp_file_name = fileName + str(fileCount) + '.csv'
+
+        f = tmp_file_name
+    else: 
+        f = fileName
+        #f = ifFileExist(resultFileName, fileCount)
+    #print(f)
+    # opening the csv file in 'a+' mode 
+    file = open(f, 'a+', newline ='')
   
-        # writing the data into the file 
-        #with file:     
-        #    write = csv.writer(file) 
-        #    write.writerows(data) 
+    # writing the data into the file 
+    with file:     
+        write = csv.writer(file) 
+        write.writerows(data)
+    
+    return f 
 
 def ifFileExist(fileName, count):
     tmp_file_name = fileName + str(count) + '.csv'
-    if os.path.isfile(tmp_file_name):
+    print(tmp_file_name)
+    if not os.path.isfile(tmp_file_name):
+        print('Here')
         return tmp_file_name
     else :   
-        ifFileExist(fileName, count + 1)
+        ifFileExist(fileName, (count + 1))
 
 # Training process
 def trainingProcess():
+    
     weather_data = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
     tmp_weather_data = copy.deepcopy(weather_data)
+    tmp_d_weather_data = copy.deepcopy(weather_data)
+
     c = initialWeatherConditions(copy.deepcopy(weather_data))
     training_data = [0] * len(weather_data)
     training_data = prepareTrainingData(copy.deepcopy(weather_data))
@@ -430,19 +443,24 @@ def trainingProcess():
     ann = ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers, output_ele_numbers, hidden_layer_bias=0.35, output_layer_bias=0.6)
     
     record_count = 0
+    is_new_round = True
+    is_d_new_round = True
+    detailFile = 'ResultsDetail'
+    resultFile = 'Results'
     for t_d in training_data :
         for i in range(40):
             ann.train(t_d, training_output[record_count])
             total_error = ann.calculate_total_error([[t_d, training_output[record_count]]])
+            detailFile = writeResultToCSV(copy.deepcopy(tmp_weather_data[record_count]), detailFile, is_d_new_round)
+            is_d_new_round = False
             print(total_error)
             if(total_error <= 0.01) :
                 break
-        #t_d.append(total_error)
         tmp_weather_data[record_count].append(total_error)
-        #writeResultToCSV(copy.deepcopy(t_d))
-        writeResultToCSV(copy.deepcopy(tmp_weather_data[record_count]))
+        resultFile = writeResultToCSV(copy.deepcopy(tmp_weather_data[record_count]), resultFile, is_new_round)
+        is_new_round = False
         record_count += 1
-
+    
 
 #weather_data_phnom_penh = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
 #barChart(copy.deepcopy(weather_data_phnom_penh))
