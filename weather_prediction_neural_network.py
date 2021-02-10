@@ -24,6 +24,7 @@ import os.path
 import copy
 import matplotlib.pyplot as plt
 import numpy as np
+import datetime
 
 # ******* End of Importing Libraries ******* #
 # ****************************************** #
@@ -394,18 +395,16 @@ def writeResultToCSV(pre_data, fileName, is_new_round = True):
     data = [pre_data] 
     resultFileName = fileName
     fileCount = 1
-    f = resultFileName + str(fileCount) + '.csv'
+    f = resultFileName + '.csv'
     if(is_new_round == True):
-        tmp_file_name = fileName + str(fileCount) + '.csv'
+        tmp_file_name = fileName + '.csv'
         while os.path.isfile(tmp_file_name) :
-            fileCount = fileCount + 1
             tmp_file_name = fileName + str(fileCount) + '.csv'
-
+            fileCount = fileCount + 1
         f = tmp_file_name
     else: 
         f = fileName
-        #f = ifFileExist(resultFileName, fileCount)
-    #print(f)
+
     # opening the csv file in 'a+' mode 
     file = open(f, 'a+', newline ='')
   
@@ -416,20 +415,31 @@ def writeResultToCSV(pre_data, fileName, is_new_round = True):
     
     return f 
 
-def ifFileExist(fileName, count):
-    tmp_file_name = fileName + str(count) + '.csv'
-    print(tmp_file_name)
-    if not os.path.isfile(tmp_file_name):
-        print('Here')
-        return tmp_file_name
-    else :   
-        ifFileExist(fileName, (count + 1))
+def originalDataGraph() :
+    print("Origin")
 
 # Training process
 def trainingProcess():
     
     weather_data = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
     tmp_weather_data = copy.deepcopy(weather_data)
+    originGraph = {}
+    for tmp in tmp_weather_data :
+        dateObj = datetime.datetime.strptime(tmp[1], '%m/%d/%Y').date()
+        if dateObj.year not in originGraph.keys() :
+            originGraph[dateObj.year] = {}
+        if dateObj.month not in originGraph[dateObj.year].keys() :
+            originGraph[dateObj.year][dateObj.month] = {}
+        if tmp[len(tmp) - 1] not in originGraph[dateObj.year][dateObj.month].keys() :
+            originGraph[dateObj.year][dateObj.month][tmp[len(tmp) - 1 ]] = 0
+        originGraph[dateObj.year][dateObj.month][tmp[len(tmp) - 1]] = originGraph[dateObj.year][dateObj.month][tmp[len(tmp) - 1]] + 1
+
+    for yIdx, yVal in originGraph.items() :
+        print(yIdx)
+        for mIdx, mVal in yVal.items() :
+            print(mIdx, mVal)
+    
+    """
     tmp_d_weather_data = copy.deepcopy(weather_data)
 
     c = initialWeatherConditions(copy.deepcopy(weather_data))
@@ -460,7 +470,7 @@ def trainingProcess():
         resultFile = writeResultToCSV(copy.deepcopy(tmp_weather_data[record_count]), resultFile, is_new_round)
         is_new_round = False
         record_count += 1
-    
+    """   
 
 #weather_data_phnom_penh = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
 #barChart(copy.deepcopy(weather_data_phnom_penh))
