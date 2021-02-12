@@ -415,6 +415,30 @@ def writeResultToCSV(pre_data, fileName, is_new_round = True):
     
     return f 
 
+def barGraph(data):
+    labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    
+    for con in weather_conditions:
+        for yIdxP, yValP in data.items() :
+            for mIdxP, mValP in yValP.items() :
+            
+
+    men_means = [20, 35, 30, 35, 27, 40, 23, 49, 29, 48, 32, 21]
+    women_means = [25, 32, 34, 20, 25, 43, 12, 43, 12, 34, 65, 64]
+    gay_means = [32, 34, 23, 12, 15, 24, 45, 23, 45, 34, 31, 46]
+    men_std = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    women_std = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    gay_std = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    width = 0.35       # the width of the bars: can also be len(x) sequence
+    fig, ax = plt.subplots()
+    ax.bar(labels, men_means, width, yerr=men_std, label='Men')
+    ax.bar(labels, women_means, width, yerr=women_std, bottom=men_means, label='Women')
+    ax.bar(labels, gay_means, width, yerr=gay_std, bottom=women_means, label='Gay')
+    ax.set_ylabel('Percentage')
+    ax.set_title('Percentage of Weather Event Every Months')
+    ax.legend()
+    plt.show()
+
 def originalDataGraph() :
     print("Origin")
 
@@ -423,22 +447,43 @@ def trainingProcess():
     
     weather_data = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
     tmp_weather_data = copy.deepcopy(weather_data)
+    conditions = initialWeatherConditions(copy.deepcopy(weather_data))
+    #print(conditions)
     originGraph = {}
-    for tmp in tmp_weather_data :
-        dateObj = datetime.datetime.strptime(tmp[1], '%m/%d/%Y').date()
-        if dateObj.year not in originGraph.keys() :
+    totalRecordEachMonth = {}
+    for tmp_data in tmp_weather_data: 
+        dateObj = datetime.datetime.strptime(tmp_data[1], '%m/%d/%Y').date()
+        if tmp_data[len(tmp_data)-1] == '':
+            continue
+        if dateObj.year not in originGraph.keys() : 
             originGraph[dateObj.year] = {}
+            totalRecordEachMonth[dateObj.year] = {}
         if dateObj.month not in originGraph[dateObj.year].keys() :
             originGraph[dateObj.year][dateObj.month] = {}
-        if tmp[len(tmp) - 1] not in originGraph[dateObj.year][dateObj.month].keys() :
-            originGraph[dateObj.year][dateObj.month][tmp[len(tmp) - 1 ]] = 0
-        originGraph[dateObj.year][dateObj.month][tmp[len(tmp) - 1]] = originGraph[dateObj.year][dateObj.month][tmp[len(tmp) - 1]] + 1
+            totalRecordEachMonth[dateObj.year][dateObj.month] = 0 
+            for condition in conditions :
+                originGraph[dateObj.year][dateObj.month][condition] = 0
+        originGraph[dateObj.year][dateObj.month][tmp_data[len(tmp_data)-1]] = originGraph[dateObj.year][dateObj.month][tmp_data[len(tmp_data)-1]] + 1
+        totalRecordEachMonth[dateObj.year][dateObj.month] = totalRecordEachMonth[dateObj.year][dateObj.month] + 1
 
+    originGraphAsPercentage = copy.deepcopy(originGraph)
+    for yIdxP, yValP in originGraphAsPercentage.items() :
+        for mIdxP, mValP in yValP.items() :
+            #print(yIdxP, mIdxP)
+            for idxP, valP in mValP.items():
+                originGraphAsPercentage[yIdxP][mIdxP][idxP] = (originGraphAsPercentage[yIdxP][mIdxP][idxP] / totalRecordEachMonth[yIdxP][mIdxP]) * 100 
+               # print(idxP, originGraphAsPercentage[yIdxP][mIdxP][idxP])
+    barGraph(originGraphAsPercentage)
+    """        
     for yIdx, yVal in originGraph.items() :
-        print(yIdx)
         for mIdx, mVal in yVal.items() :
-            print(mIdx, mVal)
-    
+            print(yIdx, mIdx)
+            for idx, val in mVal.items():
+                print(idx, val)
+    """
+
+    #print(totalRecordEachMonth)
+
     """
     tmp_d_weather_data = copy.deepcopy(weather_data)
 
