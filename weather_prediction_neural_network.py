@@ -584,12 +584,12 @@ def trainingProcess():
         # - hid* 6*2 L2 (R23)
         # - hid* 6*3 L2 (R24)
     # Round 5 epoch 1000, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
-        # - hid* 6 L1 
-        # - hid* 6*2
-        # - hid* 6*3
-        # - hid* 6 L2 
-        # - hid* 6*2 L2 
-        # - hid* 6*3 L2 
+        # - hid* 6 L1 R25
+        # - hid* 6*2 R26
+        # - hid* 6*3 R27
+        # - hid* 6 L2 R28
+        # - hid* 6*2 L2 R29
+        # - hid* 6*3 L2 R30
     ann = ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers*3, output_ele_numbers, num_layers=2, hidden_layer_bias=0.35, output_layer_bias=0.6)
     
     record_count = 0
@@ -598,7 +598,7 @@ def trainingProcess():
     detailFile = 'ResultsDetail'
     resultFile = 'Results'
     for t_d in training_data :
-        for i in range(500) :
+        for i in range(1000) :
             ann.train(t_d, training_output[record_count])
             total_error = ann.calculate_total_error([[t_d, training_output[record_count]]])
             training_record_cpy = copy.deepcopy(tmp_weather_data[record_count])
