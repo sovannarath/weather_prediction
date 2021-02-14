@@ -564,11 +564,22 @@ def trainingProcess():
         # - hid* 6*3 L2 (OK, R6&RD6)
     # Round 2 epoch 80, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], output 25
         # - hid* 6 L1 (Ok, R7&RD7)
+        # - hid* 6*2 L1 (Ok, R8&RD8)
+        # - hid* 6*3 L1 (R9&RD9)
+        # - hid* 6 L2 (R10&RD10)
+        # - hid* 6*2 L2 (R11&RD11)
+        # - hid* 6*3 L2 (R12&RD12)
     # Round 3 epoch 160, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
+        # - hid* 6 L1 (R13&RD13)
+        # - hid* 6*2 L1 (R14&RD14)
+        # - hid* 6*3 L1 (R15&RD15)
+        # - hid* 6 L2 (R16&RD16)
+        # - hid* 6*2 L2 (R17&RD17)
+        # - hid* 6*3 L2 (R18&RD18)
     # Round 4 epoch 500, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
     # Round 5 epoch 1000, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
 
-    ann = ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers, output_ele_numbers, hidden_layer_bias=0.35, output_layer_bias=0.6)
+    ann = ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers*3, output_ele_numbers, num_layers=2, hidden_layer_bias=0.35, output_layer_bias=0.6)
     
     record_count = 0
     is_new_round = True
@@ -576,7 +587,7 @@ def trainingProcess():
     detailFile = 'ResultsDetail'
     resultFile = 'Results'
     for t_d in training_data :
-        for i in range(80) :
+        for i in range(160) :
             ann.train(t_d, training_output[record_count])
             total_error = ann.calculate_total_error([[t_d, training_output[record_count]]])
             training_record_cpy = copy.deepcopy(tmp_weather_data[record_count])
