@@ -25,6 +25,7 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime
+import time
 
 # ******* End of Importing Libraries ******* #
 # ****************************************** #
@@ -298,13 +299,15 @@ def prepareTrainingOutput(original_weather_data) :
     training_output = []
     for row in tmp_origin_data :
         tmp_w_conditions = []
-        for con_data in weather_conditions:
-            tmp_w_conditions.append(0.01)
-        tmp_w_con_index = 0
+        #for con_data in weather_conditions:
+        #    tmp_w_conditions.append(0.01)
+        #tmp_w_con_index = 0
         for con in weather_conditions:
             if(row[len(row) - 1].lower() == con.lower()) :
-                tmp_w_conditions[tmp_w_con_index] = 0.99
-            tmp_w_con_index += 1
+                tmp_w_conditions.append(0.99)
+            else:
+                tmp_w_conditions.append(0.01)
+            #tmp_w_con_index += 1
         training_output.append(tmp_w_conditions)
     return training_output
 
@@ -415,79 +418,115 @@ def writeResultToCSV(pre_data, fileName, is_new_round = True):
     
     return f 
 
-def barGraph(data):
-    labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    
-    for con in weather_conditions:
-        for yIdxP, yValP in data.items() :
-            for mIdxP, mValP in yValP.items() :
-            
-
-    men_means = [20, 35, 30, 35, 27, 40, 23, 49, 29, 48, 32, 21]
-    women_means = [25, 32, 34, 20, 25, 43, 12, 43, 12, 34, 65, 64]
-    gay_means = [32, 34, 23, 12, 15, 24, 45, 23, 45, 34, 31, 46]
-    men_std = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    women_std = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    gay_std = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    width = 0.35       # the width of the bars: can also be len(x) sequence
-    fig, ax = plt.subplots()
-    ax.bar(labels, men_means, width, yerr=men_std, label='Men')
-    ax.bar(labels, women_means, width, yerr=women_std, bottom=men_means, label='Women')
-    ax.bar(labels, gay_means, width, yerr=gay_std, bottom=women_means, label='Gay')
-    ax.set_ylabel('Percentage')
-    ax.set_title('Percentage of Weather Event Every Months')
-    ax.legend()
-    plt.show()
-
-def originalDataGraph() :
-    print("Origin")
-
-# Training process
-def trainingProcess():
-    
-    weather_data = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
-    tmp_weather_data = copy.deepcopy(weather_data)
-    conditions = initialWeatherConditions(copy.deepcopy(weather_data))
-    #print(conditions)
+def yearlyWeatherCondition(weather_data):
     originGraph = {}
     totalRecordEachMonth = {}
-    for tmp_data in tmp_weather_data: 
-        dateObj = datetime.datetime.strptime(tmp_data[1], '%m/%d/%Y').date()
-        if tmp_data[len(tmp_data)-1] == '':
+    totalEachYearRecord = {}
+    for data in weather_data: 
+        dateObj = datetime.datetime.strptime(data[1], '%m/%d/%Y').date()
+        if data[len(data)-1] == '':
             continue
         if dateObj.year not in originGraph.keys() : 
             originGraph[dateObj.year] = {}
             totalRecordEachMonth[dateObj.year] = {}
+            totalEachYearRecord[dateObj.year] = 0
         if dateObj.month not in originGraph[dateObj.year].keys() :
             originGraph[dateObj.year][dateObj.month] = {}
             totalRecordEachMonth[dateObj.year][dateObj.month] = 0 
-            for condition in conditions :
-                originGraph[dateObj.year][dateObj.month][condition] = 0
-        originGraph[dateObj.year][dateObj.month][tmp_data[len(tmp_data)-1]] = originGraph[dateObj.year][dateObj.month][tmp_data[len(tmp_data)-1]] + 1
+            for weather_condition in weather_conditions :
+                originGraph[dateObj.year][dateObj.month][weather_condition] = 0
+        originGraph[dateObj.year][dateObj.month][data[len(data)-1]] = originGraph[dateObj.year][dateObj.month][data[len(data)-1]] + 1
         totalRecordEachMonth[dateObj.year][dateObj.month] = totalRecordEachMonth[dateObj.year][dateObj.month] + 1
+        totalEachYearRecord[dateObj.year] = totalEachYearRecord[dateObj.year] + 1
+    
 
+    yearlyConditionData = {}
+    tmp_originGrap = copy.deepcopy(originGraph)
+    for t_yIdx, t_yVal in tmp_originGrap.items() :
+        if t_yIdx not in yearlyConditionData.keys():
+            yearlyConditionData[t_yIdx] = {}
+        for condition in weather_conditions:
+            for t_mIdx, t_mVal in t_yVal.items():
+                if condition not in yearlyConditionData[t_yIdx].keys():
+                    yearlyConditionData[t_yIdx][condition] = 0
+                yearlyConditionData[t_yIdx][condition] = yearlyConditionData[t_yIdx][condition] + t_mVal[condition]
+    
+    yearlyConditionDataAsPercentage = copy.deepcopy(yearlyConditionData)
+    for yl_idx, yl_val in yearlyConditionDataAsPercentage.items() :
+        fileNamePeiChart = 'YealyOriginGraph' + str(yl_idx)
+        is_new_round = True
+        for con_idx, con_val in yl_val.items() :
+            yearlyConditionDataAsPercentage[yl_idx][con_idx] = (yearlyConditionDataAsPercentage[yl_idx][con_idx] / totalEachYearRecord[yl_idx]) * 100
+            d = []
+            d.insert(0, con_idx)
+            d.insert(1, yearlyConditionDataAsPercentage[yl_idx][con_idx])
+            fileNamePeiChart = writeResultToCSV(d, fileNamePeiChart, is_new_round)
+            is_new_round = False
+
+def monthlyWeatherConditon(weather_data):
+    originGraph = {}
+    totalRecordEachMonth = {}
+    totalEachYearRecord = {}
+    for data in weather_data: 
+        dateObj = datetime.datetime.strptime(data[1], '%m/%d/%Y').date()
+        if data[len(data)-1] == '':
+            continue
+        if dateObj.year not in originGraph.keys() : 
+            originGraph[dateObj.year] = {}
+            totalRecordEachMonth[dateObj.year] = {}
+            totalEachYearRecord[dateObj.year] = 0
+        if dateObj.month not in originGraph[dateObj.year].keys() :
+            originGraph[dateObj.year][dateObj.month] = {}
+            totalRecordEachMonth[dateObj.year][dateObj.month] = 0 
+            for weather_condition in weather_conditions :
+                originGraph[dateObj.year][dateObj.month][weather_condition] = 0
+        originGraph[dateObj.year][dateObj.month][data[len(data)-1]] = originGraph[dateObj.year][dateObj.month][data[len(data)-1]] + 1
+        totalRecordEachMonth[dateObj.year][dateObj.month] = totalRecordEachMonth[dateObj.year][dateObj.month] + 1
+        totalEachYearRecord[dateObj.year] = totalEachYearRecord[dateObj.year] + 1
+            
+    # Monthly weather event
     originGraphAsPercentage = copy.deepcopy(originGraph)
     for yIdxP, yValP in originGraphAsPercentage.items() :
         for mIdxP, mValP in yValP.items() :
-            #print(yIdxP, mIdxP)
             for idxP, valP in mValP.items():
                 originGraphAsPercentage[yIdxP][mIdxP][idxP] = (originGraphAsPercentage[yIdxP][mIdxP][idxP] / totalRecordEachMonth[yIdxP][mIdxP]) * 100 
-               # print(idxP, originGraphAsPercentage[yIdxP][mIdxP][idxP])
-    barGraph(originGraphAsPercentage)
-    """        
-    for yIdx, yVal in originGraph.items() :
-        for mIdx, mVal in yVal.items() :
-            print(yIdx, mIdx)
-            for idx, val in mVal.items():
-                print(idx, val)
-    """
 
-    #print(totalRecordEachMonth)
+    labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    conditions = {}
+    for yIdxP, yValP in originGraphAsPercentage.items() :
+        conditions[yIdxP] = {}
+        for con in weather_conditions:
+            conditions[yIdxP][con] = []
+            for mIdxP, mValP in yValP.items() :
+                conditions[yIdxP][con].append(mValP[con])
 
-    """
+    err_std = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    width = 0.35  # the width of the bars: can also be len(x) sequence
+
+    for c, v in conditions.items():
+        fig, ax = plt.subplots()
+        fileName = 'barGraph' + str(c)
+        is_new_round = True
+        for i, a in v.items():
+            d = copy.deepcopy(a)
+            d.insert(0, i)
+            print(i,d)
+            fileName = writeResultToCSV(d, fileName, is_new_round)
+            is_new_round = False
+            ax.bar(labels, a, width, yerr=err_std, label=i)
+        ax.set_ylabel('Percentage')
+        ax.set_title('Percentage of Weather Event in ' + str(c))
+        ax.legend()
+    plt.show()
+    #End monthly weather event    
+
+# Training process
+def trainingProcess():
+    start_time = time.time()
+    weather_data = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
+    tmp_weather_data = copy.deepcopy(weather_data)
+    conditions = initialWeatherConditions(copy.deepcopy(weather_data))
     tmp_d_weather_data = copy.deepcopy(weather_data)
-
-    c = initialWeatherConditions(copy.deepcopy(weather_data))
     training_data = [0] * len(weather_data)
     training_data = prepareTrainingData(copy.deepcopy(weather_data))
     training_output = [0] * len(weather_data)
@@ -495,7 +534,17 @@ def trainingProcess():
     
     input_ele_numbers = len(training_data[0])
     output_ele_numbers = len(training_output[0])
-    ann = ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers, output_ele_numbers, hidden_layer_bias=0.35, output_layer_bias=0.6)
+
+    # Round 1 epoch 40, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], output 25, 
+            # - hid* 6  L1 (Ok, R&RD)
+            # - hid* 6*2 L1 (Ok, R1&RD1)
+            # - hid* 6*3 L1 (OK, R2&RD2)
+    # Round 2 epoch 80, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], output 25
+    # Round 3 epoch 160, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
+    # Round 4 epoch 500, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
+    # Round 5 epoch 1000, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
+
+    ann = ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers*3, output_ele_numbers, hidden_layer_bias=0.35, output_layer_bias=0.6)
     
     record_count = 0
     is_new_round = True
@@ -503,10 +552,12 @@ def trainingProcess():
     detailFile = 'ResultsDetail'
     resultFile = 'Results'
     for t_d in training_data :
-        for i in range(40):
+        for i in range(40) :
             ann.train(t_d, training_output[record_count])
             total_error = ann.calculate_total_error([[t_d, training_output[record_count]]])
-            detailFile = writeResultToCSV(copy.deepcopy(tmp_weather_data[record_count]), detailFile, is_d_new_round)
+            training_record_cpy = copy.deepcopy(tmp_weather_data[record_count])
+            training_record_cpy.append(total_error)
+            detailFile = writeResultToCSV(training_record_cpy, detailFile, is_d_new_round)
             is_d_new_round = False
             print(total_error)
             if(total_error <= 0.01) :
@@ -515,10 +566,14 @@ def trainingProcess():
         resultFile = writeResultToCSV(copy.deepcopy(tmp_weather_data[record_count]), resultFile, is_new_round)
         is_new_round = False
         record_count += 1
-    """   
+    time.sleep(1)
 
-#weather_data_phnom_penh = readCSV('Phnom_Penh_Weather_Data - Sheet1.csv')
-#barChart(copy.deepcopy(weather_data_phnom_penh))
-#pieChart(copy.deepcopy(weather_data_phnom_penh))
-#scatterPlot(copy.deepcopy(weather_data_phnom_penh))
+    end_time = time.time()
+    execution_time = []
+    execution_time.append(start_time)
+    execution_time.append(end_time)
+    writeResultToCSV(execution_time, detailFile, is_d_new_round)
+    
+
+# Method Training
 trainingProcess()
