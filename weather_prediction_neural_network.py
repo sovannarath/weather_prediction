@@ -62,6 +62,8 @@ class Neuron:
     # Following the formular yᵢ = Σxᵢwᵢ + bias
     def calculate_total_net_input(self):
         total = 0
+        #print("Neuron: ", self.inputs)
+        #print("weight: ", self.weights)
         for i in range(len(self.inputs)):
             total += float(self.inputs[i]) * self.weights[i]
         return total + self.bias
@@ -95,6 +97,7 @@ class Neuron:
     # The partial derivative of the total net input with respective to a given weight (with everything else held constant) then is:
     # = ∂Netⱼ/∂wᵢ = some constant + 1 * xᵢw₁^(1-0) + some constant ... = xᵢ
     def calculate_partial_derivative_total_net_input_with_respect_to_weight(self, index):
+        #print(self.inputs[index])
         return self.inputs[index]
 
     # Method calculate partial derivative of total errors with respect to weight of i (∂E/∂zⱼ) 
@@ -124,7 +127,7 @@ class NeuronLayer:
             self.neurons.append(Neuron(self.bias))
 
     def inspect(self):
-        print('Neurons:', len(self.neurons))
+        #print('Neurons:', len(self.neurons))
         for n in range(len(self.neurons)):
             print(' Neuron', n)
             for w in range(len(self.neurons[n].weights)):
@@ -133,6 +136,7 @@ class NeuronLayer:
 
     def feed_forward(self, inputs):
         outputs = []
+        #print("number of Neuron: ", len(self.neurons))
         for neuron in self.neurons:
             outputs.append(neuron.calculate_output(inputs))
         return outputs
@@ -159,11 +163,12 @@ class ArtificialNeuralNetwork:
     def __init__(self, num_inputs, num_hidden, num_outputs, num_layers = 1, hidden_layer_weights = None, hidden_layer_bias = None, output_layer_weights = None, output_layer_bias = None):
         self.num_inputs = num_inputs
         self.num_layers = num_layers
-        
+
         self.hidden_layer = [0] * num_layers
         for l in range(num_layers):
             self.hidden_layer[l] = NeuronLayer(num_hidden, hidden_layer_bias)
-            self.init_weights_from_inputs_to_hidden_layer_neurons(hidden_layer_weights)
+        self.init_weights_from_inputs_to_hidden_layer_neurons(hidden_layer_weights)
+        #print(self.hidden_layer[0].neurons[0].weights)
 
         self.output_layer = NeuronLayer(num_outputs, output_layer_bias)
         self.init_weights_from_hidden_layer_neurons_to_output_layer_neurons(output_layer_weights)
@@ -173,12 +178,20 @@ class ArtificialNeuralNetwork:
         for l in range(self.num_layers):
             weight_num = 0
             for h in range(len(self.hidden_layer[l].neurons)):
-                for i in range(self.num_inputs):
-                    if not hidden_layer_weights:
-                        self.hidden_layer[l].neurons[h].weights.append(random.random())
-                    else:
-                        self.hidden_layer[l].neurons[h].weights.append(hidden_layer_weights[weight_num])
-                    weight_num += 1
+                if l == 0 :
+                    for i in range(self.num_inputs):
+                        if not hidden_layer_weights:
+                            self.hidden_layer[l].neurons[h].weights.append(random.random())
+                        else:
+                            self.hidden_layer[l].neurons[h].weights.append(hidden_layer_weights[weight_num])
+                        weight_num += 1
+                else :
+                    for i in range(len(self.hidden_layer[l].neurons)):
+                        if not hidden_layer_weights:
+                            self.hidden_layer[l].neurons[h].weights.append(random.random())
+                        else:
+                            self.hidden_layer[l].neurons[h].weights.append(hidden_layer_weights[weight_num])
+                        weight_num += 1
 
     # Method used to initialize weight for each neuron of output layer
     def init_weights_from_hidden_layer_neurons_to_output_layer_neurons(self, output_layer_weights):
@@ -205,17 +218,23 @@ class ArtificialNeuralNetwork:
 
     # Method call to calculate feed forward with multilayer neural network
     def feed_forward(self, inputs):
+        #print(inputs)
         layer_feed_forward_results = [0] * self.num_layers
         for l in range(self.num_layers):
             if (l == 0) :
+                #print("OK!")
                 layer_feed_forward_results[l] = self.hidden_layer[l].feed_forward(inputs)
+                #print(layer_feed_forward_results[l])
             else:
+                #print("Ok2!: ", l)
                 layer_feed_forward_results[l] = self.hidden_layer[l].feed_forward(layer_feed_forward_results[l-1])
+                #print(layer_feed_forward_results[l])
         return self.output_layer.feed_forward(layer_feed_forward_results[len(self.hidden_layer)-1])
 
     # Method for back propagation calculation process
     # Uses online learning, ie updating the weights after each training case
     def train(self, training_inputs, training_outputs):
+        #print(training_inputs)
         self.feed_forward(training_inputs)
 
         # 1. Output neuron deltas
@@ -510,7 +529,7 @@ def monthlyWeatherConditon(weather_data):
         for i, a in v.items():
             d = copy.deepcopy(a)
             d.insert(0, i)
-            print(i,d)
+            #print(i,d)
             fileName = writeResultToCSV(d, fileName, is_new_round)
             is_new_round = False
             ax.bar(labels, a, width, yerr=err_std, label=i)
@@ -536,15 +555,20 @@ def trainingProcess():
     output_ele_numbers = len(training_output[0])
 
     # Round 1 epoch 40, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], output 25, 
-            # - hid* 6  L1 (Ok, R&RD)
-            # - hid* 6*2 L1 (Ok, R1&RD1)
-            # - hid* 6*3 L1 (OK, R2&RD2)
+        # - hid* 6  L1 (Ok, R&RD)
+        # - hid* 6*2 L1 (Ok, R1&RD1)
+        # - hid* 6*3 L1 (OK, R2&RD2)
+        # - hid* 6*4 L1 (Ok, R3&RD3)
+        # - hid* 6 L2 (OK, R4&RD4)
+        # - hid* 6*2 L2 (Ok, R5&RD5)
+        # - hid* 6*3 L2 (OK, R6&RD6)
     # Round 2 epoch 80, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], output 25
+        # - hid* 6 L1 (Ok, R7&RD7)
     # Round 3 epoch 160, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
     # Round 4 epoch 500, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
     # Round 5 epoch 1000, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
 
-    ann = ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers*3, output_ele_numbers, hidden_layer_bias=0.35, output_layer_bias=0.6)
+    ann = ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers, output_ele_numbers, hidden_layer_bias=0.35, output_layer_bias=0.6)
     
     record_count = 0
     is_new_round = True
@@ -552,7 +576,7 @@ def trainingProcess():
     detailFile = 'ResultsDetail'
     resultFile = 'Results'
     for t_d in training_data :
-        for i in range(40) :
+        for i in range(80) :
             ann.train(t_d, training_output[record_count])
             total_error = ann.calculate_total_error([[t_d, training_output[record_count]]])
             training_record_cpy = copy.deepcopy(tmp_weather_data[record_count])
