@@ -293,10 +293,11 @@ def readCSV(fileName) :
         csv_reader = csv.reader(csv_file, delimiter=',')
         tmp_ori_index = 0
         for row in csv_reader:
-            if tmp_ori_index == 0 :
-                data_column_header.append(row)
-            else:
-                original_weather_data.append(row)
+            #if tmp_ori_index == 0 :
+            #    data_column_header.append(row)
+            #lse:
+                #original_weather_data.append(row)
+            original_weather_data.append(row)
             tmp_ori_index += 1
     return original_weather_data
 
@@ -622,4 +623,53 @@ def trainingProcess():
     
 
 # Method Training
-trainingProcess()
+#trainingProcess()
+
+
+def readingResultSet():
+    dataSets = readCSV('Results30.csv')
+
+    tenPercentErr = 0
+    for data in dataSets :
+        if float(data[len(data)-1]) <= 0.01 :
+            tenPercentErr += 1
+    print(len(dataSets), tenPercentErr)
+
+readingResultSet()
+
+    # Round 1 epoch 40, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], output 25, 
+        # - hid* 6  L1 (Ok, R&RD) 95.40%
+        # - hid* 6*2 L1 (Ok, R1&RD1) 99.74%
+        # - hid* 6*3 L1 (OK, R2&RD2) 98.42%
+        # - hid* 6*4 L1 (Ok, R3&RD3) 74.49%
+        # - hid* 6 L2 (OK, R4&RD4) 92.98%
+        # - hid* 6*2 L2 (Ok, R5&RD5) 99.74%
+        # - hid* 6*3 L2 (OK, R6&RD6) 98.00%
+    # Round 2 epoch 80, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], output 25
+        # - hid* 6 L1 (Ok, R7&RD7) 99.65%
+        # - hid* 6*2 L1 (Ok, R8&RD8) 99.97%
+        # - hid* 6*3 L1 (R9&RD9) 98.99%
+        # - hid* 6 L2 (R10&RD10) 96.72%
+        # - hid* 6*2 L2 (R11&RD11) 99.97%
+        # - hid* 6*3 L2 (R12&RD12) 98.49%
+    # Round 3 epoch 160, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
+        # - hid* 6 L1 (R13&RD13) 99.95%
+        # - hid* 6*2 L1 (R14&RD14) 99.98%
+        # - hid* 6*3 L1 (R15&RD15) 99.92%
+        # - hid* 6 L2 (R16&RD16) 98.84%
+        # - hid* 6*2 L2 (R17&RD17) 99.98%
+        # - hid* 6*3 L2 (R18&RD18) 99.82%
+    # Round 4 epoch 500, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
+        # - hid* 6 L1 (R19&RD19) 100%
+        # - hid* 6*2 (R20&RD20) 99.97%
+        # - hid* 6*3 (R21&RD21) 99.91%
+        # - hid* 6 L2 (R22&RD22) 100%
+        # - hid* 6*2 L2 (R23) 99.99%
+        # - hid* 6*3 L2 (R24) 99.90%
+    # Round 5 epoch 1000, input 6, hidden [6, 6*2, 6*3, 6*4, 6*5], layer[1, 2], ouotput 25
+        # - hid* 6 L1 R25 99.99%
+        # - hid* 6*2 R26 100%
+        # - hid* 6*3 R27 99.90%
+        # - hid* 6 L2 R28 100%
+        # - hid* 6*2 L2 R29 100%
+        # - hid* 6*3 L2 R30 99.91%
