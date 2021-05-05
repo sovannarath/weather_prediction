@@ -1,3 +1,5 @@
+import csv
+
 # Reading data into array
 def readCSV(fileName) :
     original_weather_data = []
@@ -24,7 +26,7 @@ def prepareTrainingData(original_weather_data) :
     return training_data
 
 # Preparation output node
-def prepareTrainingOutput(original_weather_data) :
+def prepareTrainingOutput(original_weather_data, weather_conditions) :
     tmp_origin_data = original_weather_data
     training_output = []
     for row in tmp_origin_data :
@@ -38,6 +40,7 @@ def prepareTrainingOutput(original_weather_data) :
     return training_output
 
 def initialWeatherConditions(weather_data):
+    weather_conditions = []
     tmp_weather_conditions = {}
     for w in weather_data:
         if(w[len(w)-1] != ''):

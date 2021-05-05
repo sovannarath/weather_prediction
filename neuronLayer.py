@@ -4,6 +4,7 @@
 # Class represented each layer of artificial neural network. 
 # There are many nodes in each layer.
 # *****************************************************************
+import neuron
 class NeuronLayer:
     def __init__(self, num_neurons, bias):
 
@@ -12,7 +13,7 @@ class NeuronLayer:
 
         self.neurons = []
         for i in range(num_neurons):
-            self.neurons.append(Neuron(self.bias))
+            self.neurons.append(neuron.Neuron(self.bias))
 
     def inspect(self):
         #print('Neurons:', len(self.neurons))

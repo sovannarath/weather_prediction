@@ -4,6 +4,8 @@
 # This class represente a whole nueral network tha contain all layer
 # of node and essential methods in calculating ANN.
 # *******************************************************************
+import random
+import neuronLayer
 class ArtificialNeuralNetwork:
     LEARNING_RATE = 0.5
 
@@ -13,11 +15,11 @@ class ArtificialNeuralNetwork:
 
         self.hidden_layer = [0] * num_layers
         for l in range(num_layers):
-            self.hidden_layer[l] = NeuronLayer(num_hidden, hidden_layer_bias)
+            self.hidden_layer[l] = neuronLayer.NeuronLayer(num_hidden, hidden_layer_bias)
         self.init_weights_from_inputs_to_hidden_layer_neurons(hidden_layer_weights)
         #print(self.hidden_layer[0].neurons[0].weights)
 
-        self.output_layer = NeuronLayer(num_outputs, output_layer_bias)
+        self.output_layer = neuronLayer.NeuronLayer(num_outputs, output_layer_bias)
         self.init_weights_from_hidden_layer_neurons_to_output_layer_neurons(output_layer_weights)
 
     # Method used to initialize weights for neuron of each network layer 
