@@ -1,9 +1,30 @@
-# Import library
+# ***************************************************************** #
+# Royal University of Phnom Penh                                    #
+# Master of Information Technology and Engineering (MITE)           #
+# Cohort 13 (November 2018 - 2020)                                  #
+# Supervisor Name: Dr. Srun Sovila                                  #
+# Field of Research: Data Science                                   #
+#                                                                   #
+# Thesis title: Weather Prediction Using Artificial Neural Network  #
+# Author Name: Thorn Sovannarath                                    #
+# Start Date: 11 November 2020                                      #
+# Date of Completion: Not yet defined                               #
+# ***************************************************************** #
+
+
+# *****************************************************************
+# Import Libraries
+#
+# Import necessary required libraries to work with ANN
+# *****************************************************************
+import math
 from os import system, name
 from time import sleep
 import helper
 import copy
 import artificialNeuralNetwork
+import datetime
+import time
 
 # Defining nescessary variables
 exit = False
@@ -20,7 +41,7 @@ def uploadDataFile():
     weatherData = helper.readCSV(fileName)
     for data in weatherData :
         print(data)
-
+    del weatherData[0]
     sleep(1)
     _ = system('clear')
     print('\n')
@@ -58,16 +79,27 @@ def trainingNeuralNetwork():
         print('-> Success')
         sleep(0.5)
 
+        start_time = time.time()
         record_count = 0
         for t_d in training_data :
-            for i in range(80) :
+            for i in range(40) :
                 ann.train(t_d, training_output[record_count])
                 total_error = ann.calculate_total_error([[t_d, training_output[record_count]]])
-                print(total_error)
+                freq_epoch = i
                 if(total_error <= 0.01) :
                     break
+            tmp_data = copy.deepcopy(weatherData[record_count])
+            tmp_data.append(total_error)
+            tmp_data.append(freq_epoch)
+            helper.writeResultToCSV(tmp_data, 'Result_' + crrentFileUpload)
             record_count += 1
-
+        time.sleep(1)
+        end_time = time.time()
+        execution_time = []
+        execution_time.append(start_time)
+        execution_time.append(end_time)
+        helper.writeResultToCSV(execution_time, 'Result_' + crrentFileUpload)
+        
         _ = system('clear')
         print('\n')
         print('Training data success!')

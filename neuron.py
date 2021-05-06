@@ -3,6 +3,8 @@
 #
 # Class represented each neuron node of artificial neural network.
 # *****************************************************************
+import math
+import numpy as np
 class Neuron:
 
     def __init__(self, bias):
@@ -28,7 +30,7 @@ class Neuron:
 
     # This is activation applied the logistic function to the output of the neuron
     def sigmoid(self, total_net_input):
-        return 1 / (1 + math.exp(-total_net_input))
+        return 1 / (1 + np.exp(-total_net_input))
 
     # The error for each neuron is calculated by the Mean Square Error method:
     def calculate_error(self, target_output):

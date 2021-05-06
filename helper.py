@@ -49,12 +49,13 @@ def initialWeatherConditions(weather_data):
         weather_conditions.append(key)
     return weather_conditions
 
-def writeResultToCSV(pre_data, fileName, is_new_round = True):
+def writeResultToCSV(pre_data, fileName):
     # data to be written row-wise in csv file
     data = [pre_data] 
+    """
     resultFileName = fileName
     fileCount = 1
-    f = resultFileName + '.csv'
+    f = resultFileName
     if(is_new_round == True):
         tmp_file_name = fileName + '.csv'
         while os.path.isfile(tmp_file_name) :
@@ -63,16 +64,16 @@ def writeResultToCSV(pre_data, fileName, is_new_round = True):
         f = tmp_file_name
     else: 
         f = fileName
-
+    """
     # opening the csv file in 'a+' mode 
-    file = open(f, 'a+', newline ='')
+    file = open(fileName, 'a+', newline ='')
   
     # writing the data into the file 
     with file:     
         write = csv.writer(file) 
         write.writerows(data)
     
-    return f 
+    #return f 
 
 def readingResultSet(fileName):
     dataSets = readCSV(fileName)
