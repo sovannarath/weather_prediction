@@ -75,30 +75,36 @@ def trainingNeuralNetwork():
         print('-Initial neural network processing...')
         input_ele_numbers = len(training_data[0])
         output_ele_numbers = len(training_output[0])
-        ann = artificialNeuralNetwork.ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers*3, output_ele_numbers, num_layers=1, hidden_layer_bias=0.35, output_layer_bias=0.6)
         print('-> Success')
         sleep(0.5)
 
-        start_time = time.time()
-        record_count = 0
-        for t_d in training_data :
-            for i in range(40) :
-                ann.train(t_d, training_output[record_count])
-                total_error = ann.calculate_total_error([[t_d, training_output[record_count]]])
-                freq_epoch = i
-                if(total_error <= 0.01) :
-                    break
-            tmp_data = copy.deepcopy(weatherData[record_count])
-            tmp_data.append(total_error)
-            tmp_data.append(freq_epoch)
-            helper.writeResultToCSV(tmp_data, 'Result_' + crrentFileUpload)
-            record_count += 1
-        time.sleep(1)
-        end_time = time.time()
-        execution_time = []
-        execution_time.append(start_time)
-        execution_time.append(end_time)
-        helper.writeResultToCSV(execution_time, 'Result_' + crrentFileUpload)
+        for epoch in [40, 80, 160, 500, 1000, 1500, 2000] :
+            for layer in [1, 2]:
+                for hid_node_incre in range(6):
+                    ann = artificialNeuralNetwork.ArtificialNeuralNetwork(input_ele_numbers, input_ele_numbers*(int(hid_node_incre) + 1), output_ele_numbers, num_layers=layer, hidden_layer_bias=0.35, output_layer_bias=0.6)
+                    start_time = time.time()
+                    record_count = 0
+                    for t_d in training_data :
+                        freq_epoch = 0
+                        for i in range(epoch) :
+                            ann.train(t_d, training_output[record_count])
+                            total_error = ann.calculate_total_error([[t_d, training_output[record_count]]])
+                            freq_epoch += 1
+                            if(total_error <= 0.01) :
+                                break
+                        print(total_error) 
+                        tmp_data = copy.deepcopy(weatherData[record_count])
+                        tmp_data.append(total_error)
+                        tmp_data.append(freq_epoch)
+                        helper.writeResultToCSV(tmp_data, 'Result_' + str(epoch) +"_epoch_"+ str(layer) + "_layer_" + str(input_ele_numbers*(int(hid_node_incre) + 1)) + "_node_" + crrentFileUpload)
+                        record_count += 1
+                    
+                    time.sleep(1)
+                    end_time = time.time()
+                    execution_time = []
+                    execution_time.append(start_time)
+                    execution_time.append(end_time)
+                    helper.writeResultToCSV(execution_time, 'Result_' + str(epoch) + "_epoch_" + str(layer) + "_layer_" + str(input_ele_numbers*(int(hid_node_incre) + 1)) + "_node_" + crrentFileUpload)
         
         _ = system('clear')
         print('\n')
