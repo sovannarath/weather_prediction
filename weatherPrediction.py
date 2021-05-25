@@ -25,6 +25,7 @@ import copy
 import artificialNeuralNetwork
 import datetime
 import time
+from prettytable import PrettyTable
 
 # Defining nescessary variables
 exit = False
@@ -121,7 +122,30 @@ def trainingNeuralNetwork():
 
 def trainingResult():
     print('\n')
-    print("Training Result")
+    for epoch in [40, 80, 160, 500, 1000, 1500, 2000] :
+        for layer in [1, 2]:
+            for hid_node_incre in range(6):
+                weatherData = helper.readCSV('Result_' + str(epoch) + "_epoch_" + str(layer) + "_layer_" + str(6*(int(hid_node_incre) + 1)) + "_node_test.csv")
+                execute_time = weatherData[len(weatherData)-1]
+                del weatherData[len(weatherData)-1]
+                #print('Result_' + str(epoch) + "_epoch_" + str(layer) + "_layer_" + str(6*(int(hid_node_incre) + 1)) + "_node_test.csv")
+                correct_count = 0
+                incorrect_count = 0
+                for w_D in weatherData :
+                    print(float(w_D[len(w_D)-2]))
+                    if float(w_D[len(w_D)-2]) <= 0.01 :
+                        correct_count += 1
+                    else :
+                        incorrect_count += 1
+            print("Correct: " + str(correct_count) + "  Incorrect: " + str(incorrect_count))
+    """my_table = PrettyTable()
+    my_table.field_names = ["No.", "Name", "Grade", "Age"]
+    my_table.add_row([1, "Bob", 6, 11])
+    my_table.add_row([2, "Freddy", 4, 10])
+    my_table.add_row([3, "John", 7, 13])
+    my_table.sortby = 'Age'
+    my_table.reversesort = True
+    print(my_table)"""
     print('\n')
 
 def exitProgram():
