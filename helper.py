@@ -77,9 +77,12 @@ def writeResultToCSV(pre_data, fileName):
 
 def readingResultSet(fileName):
     dataSets = readCSV(fileName)
-
+    del dataSets[len(dataSets)-1]
     tenPercentErr = 0
+    incorrect = 0
     for data in dataSets :
-        if float(data[len(data)-1]) <= 0.01 :
+        if float(format(float(data[len(data)-1]), 'f')) <= 0.01 :
             tenPercentErr += 1
-    print(len(dataSets), tenPercentErr)
+        else :
+            incorrect += 1
+    return [len(dataSets), tenPercentErr, incorrect]
